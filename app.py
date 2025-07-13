@@ -7,7 +7,7 @@ import logging
 import json
 
 app = Flask(__name__)
-MUSIC_FOLDER = '/musica '
+MUSIC_FOLDER = 'musica/'
 
 # Configuración fija
 CHUNK_SIZE = 1024 * 16  # 16KB chunks
