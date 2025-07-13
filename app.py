@@ -293,41 +293,7 @@ def status():
             "position": state.position,
             "listeners": threading.active_count() - 2
         })
-# ... (código Flask existente) ...
-
-@app.route('/upload', methods=['POST'])
-def upload_song():
-    if 'file' not in request.files:
-        return jsonify({"error": "No se encontró el archivo"}), 400
-        
-    file = request.files['file']
     
-    if file.filename == '':
-        return jsonify({"error": "Nombre de archivo inválido"}), 400
-        
-    if not file.filename.lower().endswith('.mp3'):
-        return jsonify({"error": "Solo se permiten archivos MP3"}), 400
-        
-    if not os.path.exists(MUSIC_FOLDER):
-        os.makedirs(MUSIC_FOLDER)
-    
-    try:
-        file_path = os.path.join(MUSIC_FOLDER, file.filename)
-        file.save(file_path)
-        
-        with state.lock:
-            update_playlist()
-        
-        return jsonify({
-            "status": "success",
-            "message": "Canción subida correctamente",
-            "filename": file.filename,
-            "path": file_path
-        }), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# ... (resto del código Flask) ...
 if __name__ == '__main__':
     # Inicialización
     update_playlist()
