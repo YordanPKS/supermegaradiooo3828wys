@@ -9,7 +9,7 @@ import socket
 app = Flask(__name__)
 
 # Configuraci?n optimizada
-MUSIC_FOLDER = '/musica'
+MUSIC_FOLDER = './musica'
 CHUNK_SIZE = 1024 * 16
 BUFFER_SIZE = 1024 * 1024 * 4
 FIXED_BITRATE = 128000
