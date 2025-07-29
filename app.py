@@ -281,12 +281,8 @@ def get_local_ip():
         return "0.0.0.0"
 
 if __name__ == '__main__':
-    # Verificar carpeta de m¨²sica
-    if not os.path.exists(MUSIC_FOLDER):
-        os.makedirs(MUSIC_FOLDER)
-        logger.warning(f"Creada carpeta: {MUSIC_FOLDER}")
     
-    # Inicializaci¨®n
+    # Inicializaci
     update_playlist()
     start_time = time.time()
     
