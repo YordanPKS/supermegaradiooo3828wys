@@ -8,11 +8,11 @@ import socket
 
 app = Flask(__name__)
 
-# Configuraci¨®n optimizada para SA-MP Mobile
+# Configuracioptimizada para SA-MP Mobile
 MUSIC_FOLDER = '/musica'
 CHUNK_SIZE = 1024 * 16  # 16KB chunks
-BUFFER_SIZE = 1024 * 1024 * 4  # 4MB buffer (reducido para m¨®viles)
-FIXED_BITRATE = 128000  # 128 kbps (optimizado para m¨®viles)
+BUFFER_SIZE = 1024 * 1024 * 4  # 4MB buffer (reducido para mÂ¨Â®viles)
+FIXED_BITRATE = 128000  # 128 kbps (optimizado para mÂ¨Â®viles)
 BYTES_PER_SECOND = FIXED_BITRATE // 8
 
 # Configurar logging optimizado
@@ -58,7 +58,7 @@ def get_audio_chunks(file_path):
         logger.error(f"Error leyendo {file_path}: {str(e)}")
 
 def update_playlist():
-    """Actualiza playlist con cach¨¦"""
+    """Actualiza playlist con cachÂ¨Â¦"""
     try:
         new_playlist = sorted(glob.glob(os.path.join(MUSIC_FOLDER, '*.mp3')))
         with state.lock:
@@ -69,14 +69,14 @@ def update_playlist():
                                 for index, song in enumerate(new_playlist)}
                 logger.info(f"Playlist actualizada: {len(new_playlist)} canciones")
                 
-            # Resetear ¨ªndice si no es v¨¢lido
+            # Resetear Â¨Âªndice si no es vÂ¨Â¢lido
             if state.playlist and not 0 <= state.song_index < len(state.playlist):
                 state.song_index = 0
     except Exception as e:
         logger.error(f"Error actualizando playlist: {str(e)}")
 
 def play_song(song_number):
-    """Reproduce canci¨®n con verificaci¨®n robusta"""
+    """Reproduce canciÂ¨Â®n con verificaciÂ¨Â®n robusta"""
     song_index = song_number - 1
     with state.lock:
         if 0 <= song_index < len(state.playlist):
@@ -90,7 +90,7 @@ def play_song(song_number):
 def broadcaster():
     """Broadcaster optimizado para bajo consumo"""
     state.active = True
-    logger.info("Iniciando transmisi¨®n...")
+    logger.info("Iniciando transmisiÂ¨Â®n...")
     
     while state.active:
         try:
@@ -106,7 +106,7 @@ def broadcaster():
                 force_change = state.force_change
                 state.force_change = False
                 
-            # Selecci¨®n de canci¨®n
+            # SelecciÂ¨Â®n de canciÂ¨Â®n
             with state.lock:
                 if not files or state.song_index >= len(files):
                     continue
@@ -123,9 +123,9 @@ def broadcaster():
                 state.is_playing = True
                 state.last_song = song_name
             
-            logger.info(f"7œ4„1‚5 Reproduciendo: {song_name} (#{state.song_index + 1})")
+            logger.info(f"Â7Å“4â€ž1â€š5 Reproduciendo: {song_name} (#{state.song_index + 1})")
             
-            # Transmisi¨®n con control de tiempo preciso
+            # TransmisiÂ¨Â®n con control de tiempo preciso
             byte_counter = 0
             start_time = time.time()
             
@@ -160,7 +160,7 @@ def broadcaster():
                 sleep_time = max(0, expected - elapsed)
                 time.sleep(sleep_time)
             
-            # Transici¨®n entre canciones
+            # TransiciÂ¨Â®n entre canciones
             with state.lock:
                 state.is_playing = False
                 state.song_index = (state.song_index + 1) % len(files)
@@ -186,7 +186,7 @@ def stream():
                 available = state.position - client_pos
                 
                 if available >= CHUNK_SIZE:
-                    # Calcular posici¨®n en buffer circular
+                    # Calcular posiciÂ¨Â®n en buffer circular
                     pos = client_pos % BUFFER_SIZE
                     end = pos + CHUNK_SIZE
                     
@@ -211,7 +211,7 @@ def stream():
                         first_chunk = False
                     
                     yield chunk
-                    time.sleep(0.001)  # Ajuste fino para m¨®viles
+                    time.sleep(0.001)  # Ajuste fino para mÂ¨Â®viles
                 else:
                     time.sleep(0.01)
     
@@ -234,18 +234,18 @@ def list_songs():
 
 @app.route('/play/<int:song_number>')
 def play_song_endpoint(song_number):
-    """Reproducir canci¨®n espec¨ªfica"""
+    """Reproducir canciÂ¨Â®n especÂ¨Âªfica"""
     success, index = play_song(song_number)
     if success:
         return jsonify({
             "status": "success",
-            "song": state.song_map.get(index, f"Canci¨®n #{song_number}")
+            "song": state.song_map.get(index, f"CanciÂ¨Â®n #{song_number}")
         })
-    return jsonify({"status": "error", "message": "N¨²mero inv¨¢lido"}), 400
+    return jsonify({"status": "error", "message": "NÂ¨Â²mero invÂ¨Â¢lido"}), 400
 
 @app.route('/next')
 def next_song():
-    """Siguiente canci¨®n optimizado"""
+    """Siguiente canciÂ¨Â®n optimizado"""
     with state.lock:
         if state.playlist:
             next_index = (state.song_index + 1) % len(state.playlist)
@@ -281,27 +281,27 @@ def get_local_ip():
         return "0.0.0.0"
 
 if __name__ == '__main__':
-    # Verificar carpeta de m¨²sica
+    # Verificar carpeta de mÂ¨Â²sica
     if not os.path.exists(MUSIC_FOLDER):
         os.makedirs(MUSIC_FOLDER)
         logger.warning(f"Creada carpeta: {MUSIC_FOLDER}")
     
-    # Inicializaci¨®n
+    # InicializaciÂ¨Â®n
     update_playlist()
     start_time = time.time()
     
     # Iniciar broadcaster en segundo plano
     threading.Thread(target=broadcaster, daemon=True).start()
     
-    # Configuraci¨®n de red
+    # ConfiguraciÂ¨Â®n de red
     PORT = 5000
     IP = get_local_ip()
     
     logger.info("=" * 50)
-    logger.info(f"”9À5  Radio SA-MP Mobile Iniciada  ”9À5")
-    logger.info(f"”9Ü8 M¨²sica en: {MUSIC_FOLDER}")
-    logger.info(f"”9Á9 Canciones: {len(state.playlist)}")
-    logger.info(f"”9±4 Direcci¨®n local: http://{IP}:{PORT}")
+    logger.info(f"â€9Ã€5  Radio SA-MP Mobile Iniciada  â€9Ã€5")
+    logger.info(f"â€9Ãœ8 MÂ¨Â²sica en: {MUSIC_FOLDER}")
+    logger.info(f"â€9Ã9 Canciones: {len(state.playlist)}")
+    logger.info(f"â€9Â±4 DirecciÂ¨Â®n local: http://{IP}:{PORT}")
     logger.info("=" * 50)
     
     # Iniciar servidor optimizado
