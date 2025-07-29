@@ -5,11 +5,12 @@ import time
 import threading
 import logging
 import socket
+import re
 
 app = Flask(__name__)
 
-# Configuraci?n optimizada
-MUSIC_FOLDER = './musica'
+# Configuración optimizada
+MUSIC_FOLDER = './musica'  # Usar directorio local del proyecto
 CHUNK_SIZE = 1024 * 16
 BUFFER_SIZE = 1024 * 1024 * 4
 FIXED_BITRATE = 128000
@@ -59,13 +60,34 @@ def get_audio_chunks(file_path):
         return []
 
 def update_playlist():
-    """Actualiza playlist con detecci?n robusta"""
+    """Actualiza playlist con detección robusta"""
     try:
-        # B?squeda recursiva de archivos MP3
-        new_playlist = glob.glob(os.path.join(MUSIC_FOLDER, '**/*.mp3'), recursive=True)
+        # Verificar que el directorio existe
+        if not os.path.exists(MUSIC_FOLDER):
+            logger.error(f"Directorio {MUSIC_FOLDER} no existe")
+            return
+            
+        # Listar todos los archivos del directorio
+        all_files = os.listdir(MUSIC_FOLDER)
+        logger.info(f"Archivos encontrados en {MUSIC_FOLDER}: {all_files}")
         
-        # Orden natural (1.mp3, 2.mp3,... 10.mp3)
-        new_playlist.sort(key=lambda x: [int(c) if c.isdigit() else c for c in re.split('(\d+)', x)])
+        # Filtrar archivos de audio
+        audio_extensions = ['.mp3', '.m4a', '.MP3', '.M4A']
+        new_playlist = []
+        
+        for filename in all_files:
+            file_path = os.path.join(MUSIC_FOLDER, filename)
+            # Verificar que es archivo y tiene extensión de audio
+            if os.path.isfile(file_path):
+                for ext in audio_extensions:
+                    if filename.endswith(ext):
+                        new_playlist.append(file_path)
+                        break
+        
+        # Ordenar alfabéticamente
+        new_playlist.sort()
+        
+        logger.info(f"Archivos de audio válidos: {[os.path.basename(f) for f in new_playlist]}")
         
         with state.lock:
             # Solo actualizar si hay cambios
@@ -75,7 +97,7 @@ def update_playlist():
                                   for index, song in enumerate(new_playlist)}
                 logger.info(f"Playlist actualizada: {len(new_playlist)} canciones")
                 
-                # Resetear ?ndice si es necesario
+                # Resetear índice si es necesario
                 if state.playlist and state.song_index >= len(state.playlist):
                     state.song_index = 0
     except Exception as e:
@@ -104,7 +126,7 @@ def broadcaster():
             files = state.playlist
             
             if not files:
-                logger.warning("No se encontraron archivos MP3 en /musica")
+                logger.warning("No se encontraron archivos de audio en /musica")
                 time.sleep(5)
                 continue
             
@@ -308,7 +330,7 @@ if __name__ == '__main__':
     PORT = 5000
     IP = get_local_ip()
     
-    logger.info(f"Directorio de m?sica: {MUSIC_FOLDER}")
+    logger.info(f"Directorio de música: {MUSIC_FOLDER}")
     logger.info(f"Archivos detectados: {len(state.playlist)}")
     logger.info(f"URL del stream: http://{IP}:{PORT}/")
     logger.info("Servidor listo para conexiones")
